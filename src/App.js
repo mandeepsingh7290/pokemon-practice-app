@@ -1,24 +1,55 @@
-import logo from './logo.svg';
-import './App.css';
+import React, { useState } from "react";
+import axios from "axios";
+import Modal from './Modal'
+import "./App.css";
 
 function App() {
+  const [content, setContent] = useState([]);
+  const [hide, setHide]= useState(true)
+  const [show, setShow]= useState(false)
+  const [modalDetails,setModalDetails] = useState({})
+  const [details, setDetails] = useState({});
+
+
+
+  const handleFetch = () => {
+    axios.get("https://pokeapi.co/api/v2/pokemon").then((response) => {
+      console.log(response);
+      setContent(response.data.results);
+      // setContent(response.data.types);
+      setHide(false)
+    });
+  };
+
+  const handleKnowMore = (poke, index) => {
+      axios.get(poke.url).then((response) => {
+        console.log(response.data.abilities);
+        setDetails(response.data);
+        console.log("abiities",response.data.abilities)
+        setModalDetails({poke: poke, pokeIndex: index + 1})
+        setShow(true)
+      });
+  }
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <>
+      {hide && <div className="main-content">
+        <h3 className="title-tag">Pokemon images and abilities</h3>
+        <button className="btn" onClick={handleFetch}>
+          Pokemon Details
+        </button>
+      </div>}
+      <div className="list-handler">
+      {content.map((poke, index) => {
+        return (
+          <div className="list-container" key={index}>
+            <h1 className="list-name">{poke.name}</h1>
+            <button className="btn-info" onClick={() => handleKnowMore(poke, index)}>Click here to know more</button>
+            </div>
+          );
+      })}
+      </div>
+      {show && <Modal modalDetails={modalDetails} setShow={setShow} details={details} />}
+    </>
   );
 }
 
